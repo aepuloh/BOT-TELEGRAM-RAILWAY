@@ -695,9 +695,3 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🌐 Web server aktif di port ${PORT}`);
 });
-
-/////////////////////////////
-// 9) SIAP JALAN
-/////////////////////////////
-
-console.log('✅ Bot jalan dengan polling (Railway). Siap menerima update...');
