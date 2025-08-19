@@ -1,15 +1,17 @@
 {
-  "name": "adsrewards-bot",
+  "name": "telegram-ads-bot",
   "version": "1.0.0",
-  "description": "Telegram AdsRewards Bot for Railway",
+  "description": "Telegram Ads & Reward Bot with daily bonus, referral, withdraw, broadcast, etc",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "node-telegram-bot-api": "^0.61.0"
-  },
-  "engines": {
-    "node": ">=18.x"
+    "axios": "^1.6.8",
+    "express": "^4.18.2",
+    "fs-extra": "^11.2.0",
+    "moment": "^2.30.1",
+    "node-telegram-bot-api": "^0.61.0",
+    "uuid": "^9.0.1"
   }
 }
