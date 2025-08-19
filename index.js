@@ -160,6 +160,7 @@ bot.onText(/\/admin/, (msg) => {
 
 /////////////////////////////
 // 5) CALLBACK QUERY (USER)
+//    (GLOBAL handler - tempat semua inline tombol diproses)
 /////////////////////////////
 
 bot.on('callback_query', async (q) => {
@@ -167,6 +168,9 @@ bot.on('callback_query', async (q) => {
   const uid = uidOf(chatId);
   const data = q.data || '';
   ensureUser(chatId, q.from.first_name || q.from.username || '');
+
+  // debug (opsional)
+  // console.log('👉 Callback:', data, 'from', chatId);
 
   // Banned?
   if (db.users[uid].banned) {
@@ -217,8 +221,23 @@ bot.on('callback_query', async (q) => {
     return bot.answerCallbackQuery(q.id);
   }
 
+  // WITHDRAW FLOW: tombol untuk menampilkan opsi
   if (data === 'withdraw_start') {
     await startWithdrawFlow(chatId);
+    return bot.answerCallbackQuery(q.id);
+  }
+
+  // ===== NEW: handle withdraw option buttons here (replaces bot.once)
+  if (data === 'withdraw_all') {
+    // tarik semua
+    await createWithdraw(chatId, db.users[uid].points || 0);
+    return bot.answerCallbackQuery(q.id);
+  }
+
+  if (data === 'withdraw_custom') {
+    // minta jumlah lewat state
+    state[uid] = { action: 'withdraw_amount' };
+    await bot.sendMessage(chatId, '✍️ Masukkan jumlah poin yang ingin ditarik (angka).');
     return bot.answerCallbackQuery(q.id);
   }
 
@@ -503,17 +522,8 @@ async function startWithdrawFlow(chatId) {
   };
   await bot.sendMessage(chatId, '💸 Pilih opsi withdraw:', kb);
 
-  // sementara pakai callback untuk opsi
-  bot.once('callback_query', async (q) => {
-    if (q.message.chat.id !== chatId) return; // bukan user ini
-    if (q.data === 'withdraw_all') {
-      await createWithdraw(chatId, user.points);
-    } else if (q.data === 'withdraw_custom') {
-      state[uidOf(chatId)] = { action: 'withdraw_amount' };
-      await bot.sendMessage(chatId, '✍️ Masukkan jumlah poin yang ingin ditarik (angka).');
-    }
-    try { await bot.answerCallbackQuery(q.id); } catch {}
-  });
+  // NOTE: previously used bot.once which caused callback capture issues.
+  // Removed here — options handled by global callback_query handler above.
 }
 
 async function createWithdraw(chatId, amount) {
